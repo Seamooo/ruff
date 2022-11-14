@@ -1,6 +1,3 @@
-use num_bigint::BigInt as RspyBigInt;
-use rustpython_parser::ast as rspy_ast;
-
 pub trait Located {
     fn start_row(&self) -> usize;
     fn start_col(&self) -> usize;
@@ -827,10 +824,161 @@ pub trait Stmt<'a>: Located {
     >;
 }
 
-// RustPython ast impls
+pub trait Ast<'a> {
+    type Ident: Ident;
+    type Alias: Alias;
+    type Arg: Arg<'a, Expr = Self::Expr>;
+    type Arguments: Arguments<'a, Expr = Self::Expr>;
+    type Keyword: Keyword<'a, Expr = Self::Expr>;
+    type BigInt: BigInt;
+    type Constant: Constant<'a, Constant = Self::Constant, BigInt = Self::BigInt>;
+    type Comprehension: Comprehension<'a, Expr = Self::Expr>;
+    type BoolOp: BoolOp<'a, Expr = Self::Expr>;
+    type NamedExpr: NamedExpr<'a, Expr = Self::NamedExpr>;
+    type BinOp: BinOp<'a, Expr = Self::Expr>;
+    type UnaryOp: UnaryOp<'a, Expr = Self::Expr>;
+    type Lambda: Lambda<'a, Arguments = Self::Arguments, Expr = Self::Expr>;
+    type IfExp: IfExp<'a, Expr = Self::Expr>;
+    type Dict: Dict<'a, Expr = Self::Expr>;
+    type Set: Set<'a, Expr = Self::Expr>;
+    type ListComp: ListComp<'a, Expr = Self::Expr, Comprehension = Self::Comprehension>;
+    type SetComp: SetComp<'a, Expr = Self::Expr, Comprehension = Self::Comprehension>;
+    type DictComp: DictComp<'a, Expr = Self::Expr, Comprehension = Self::Comprehension>;
+    type GeneratorExp: GeneratorExp<'a, Expr = Self::Expr, Comprehension = Self::Comprehension>;
+    type Await: Await<'a, Expr = Self::Expr>;
+    type Yield: Yield<'a, Expr = Self::Expr>;
+    type YieldFrom: YieldFrom<'a, Expr = Self::Expr>;
+    type Compare: Compare<'a, Expr = Self::Expr>;
+    type Call: Call<'a, Expr = Self::Expr, Keyword = Self::Keyword>;
+    type FormattedValue: FormattedValue<'a, Expr = Self::Expr>;
+    type JoinedStr: JoinedStr<'a, Expr = Self::Expr>;
+    type ConstantExpr: ConstantExpr<'a, Constant = Self::Constant>;
+    type Attribute: Attribute<'a, Expr = Self::Expr>;
+    type Subscript: Subscript<'a, Expr = Self::Expr>;
+    type Starred: Starred<'a, Expr = Self::Expr>;
+    type Name: Name;
+    type List: List<'a, Expr = Self::Expr>;
+    type Tuple: Tuple<'a, Expr = Self::Expr>;
+    type Slice: Slice<'a, Expr = Self::Expr>;
+    type Expr: Expr<
+        'a,
+        BoolOp = Self::BoolOp,
+        NamedExpr = Self::NamedExpr,
+        BinOp = Self::BinOp,
+        UnaryOp = Self::UnaryOp,
+        Lambda = Self::Lambda,
+        IfExp = Self::IfExp,
+        Dict = Self::Dict,
+        Set = Self::Set,
+        ListComp = Self::ListComp,
+        SetComp = Self::SetComp,
+        DictComp = Self::DictComp,
+        GeneratorExp = Self::GeneratorExp,
+        Await = Self::Await,
+        Yield = Self::Yield,
+        YieldFrom = Self::YieldFrom,
+        Compare = Self::Compare,
+        Call = Self::Call,
+        FormattedValue = Self::FormattedValue,
+        JoinedStr = Self::JoinedStr,
+        ConstantExpr = Self::ConstantExpr,
+        Attribute = Self::Attribute,
+        Subscript = Self::Subscript,
+        Starred = Self::Starred,
+        Name = Self::Name,
+        List = Self::List,
+        Tuple = Self::Tuple,
+        Slice = Self::Slice,
+    >;
+    type ExceptHandler: ExceptHandler<'a, Expr = Self::Expr, Stmt = Self::Stmt>;
+    type MatchValue: MatchValue<'a, Expr = Self::Expr>;
+    type MatchSingleton: MatchSingleton<'a, Constant = Self::Constant>;
+    type MatchSequence: MatchSequence<'a, Pattern = Self::Pattern>;
+    type MatchMapping: MatchMapping<'a, Expr = Self::Expr, Pattern = Self::Pattern>;
+    type MatchClass: MatchClass<'a, Expr = Self::Expr, Pattern = Self::Pattern, Ident = Self::Ident>;
+    type MatchStar: MatchStar;
+    type MatchAs: MatchAs<'a, Pattern = Self::Pattern>;
+    type MatchOr: MatchOr<'a, Pattern = Self::Pattern>;
+    type Pattern: Pattern<
+        'a,
+        MatchValue = Self::MatchValue,
+        MatchSingleton = Self::MatchSingleton,
+        MatchSequence = Self::MatchSequence,
+        MatchMapping = Self::MatchMapping,
+        MatchClass = Self::MatchClass,
+        MatchStar = Self::MatchStar,
+        MatchAs = Self::MatchAs,
+        MatchOr = Self::MatchOr,
+    >;
+    type Withitem: Withitem<'a, Expr = Self::Expr>;
+    type MatchCase: MatchCase<'a, Expr = Self::Expr, Pattern = Self::Pattern, Stmt = Self::Stmt>;
+    type FunctionDef: FunctionDef<
+        'a,
+        Arguments = Self::Arguments,
+        Expr = Self::Expr,
+        Stmt = Self::Stmt,
+    >;
+    type AsyncFunctionDef: AsyncFunctionDef<
+        'a,
+        Arguments = Self::Arguments,
+        Stmt = Self::Stmt,
+        Expr = Self::Expr,
+    >;
+    type ClassDef: ClassDef<'a, Stmt = Self::Stmt, Expr = Self::Expr, Keyword = Self::Keyword>;
+    type Return: Return<'a, Expr = Self::Expr>;
+    type Delete: Delete<'a, Expr = Self::Expr>;
+    type Assign: Assign<'a, Expr = Self::Expr>;
+    type AugAssign: AugAssign<'a, Expr = Self::Expr>;
+    type AnnAssign: AnnAssign<'a, Expr = Self::Expr>;
+    type For: For<'a, Expr = Self::Expr, Stmt = Self::Stmt>;
+    type AsyncFor: AsyncFor<'a, Expr = Self::Expr, Stmt = Self::Stmt>;
+    type While: While<'a, Expr = Self::Expr, Stmt = Self::Stmt>;
+    type If: If<'a, Expr = Self::Expr, Stmt = Self::Stmt>;
+    type With: With<'a, Withitem = Self::Withitem, Stmt = Self::Stmt>;
+    type AsyncWith: AsyncWith<'a, Withitem = Self::Withitem, Stmt = Self::Stmt>;
+    type Match: Match<'a, Expr = Self::Expr, MatchCase = Self::MatchCase>;
+    type Raise: Raise<'a, Expr = Self::Expr>;
+    type Try: Try<'a, Stmt = Self::Stmt, ExceptHandler = Self::ExceptHandler>;
+    type Assert: Assert<'a, Expr = Self::Expr>;
+    type Import: Import<Alias = Self::Alias>;
+    type ImportFrom: ImportFrom<Alias = Self::Alias>;
+    type Global: Global<Ident = Self::Ident>;
+    type Nonlocal: Nonlocal<Ident = Self::Ident>;
+    type Stmt: Stmt<
+        'a,
+        FunctionDef = Self::FunctionDef,
+        AsyncFunctionDef = Self::AsyncFunctionDef,
+        ClassDef = Self::ClassDef,
+        Return = Self::Return,
+        Delete = Self::Delete,
+        Assign = Self::Assign,
+        AugAssign = Self::AugAssign,
+        AnnAssign = Self::AnnAssign,
+        For = Self::For,
+        AsyncFor = Self::AsyncFor,
+        While = Self::While,
+        If = Self::If,
+        With = Self::With,
+        AsyncWith = Self::AsyncWith,
+        Match = Self::Match,
+        Raise = Self::Raise,
+        Try = Self::Try,
+        Assert = Self::Assert,
+        Import = Self::Import,
+        ImportFrom = Self::ImportFrom,
+        Global = Self::Global,
+        Nonlocal = Self::Nonlocal,
+        Expr = Self::Expr,
+    >;
+    fn stmts(&self) -> &[Self::Stmt];
+}
 
+// RustPython ast impls
+// TODO(Seamooo) make below a compilation feature
 mod rs_python_impls {
     use super::*;
+    use num_bigint::BigInt as RspyBigInt;
+    use rustpython_parser::ast as rspy_ast;
 
     macro_rules! rspy_types {
         ($generic_name:ident, $($ty_name:ident),*) => {
@@ -2503,6 +2651,85 @@ mod rs_python_impls {
                 rspy_ast::StmtKind::Break => StmtKind::Break,
                 rspy_ast::StmtKind::Continue => StmtKind::Continue,
             }
+        }
+    }
+
+    impl<'a, U> Ast<'a> for rspy_ast::Suite<U> {
+        type Ident = String;
+        type Alias = rspy_ast::Alias<U>;
+        type Arg = rspy_ast::Arg<U>;
+        type Arguments = rspy_ast::Arguments<U>;
+        type Keyword = rspy_ast::Keyword<U>;
+        type BigInt = RspyBigInt;
+        type Constant = rspy_ast::Constant;
+        type Comprehension = rspy_ast::Comprehension<U>;
+        type BoolOp = rspy_ast::ExprKind<U>;
+        type NamedExpr = rspy_ast::ExprKind<U>;
+        type BinOp = rspy_ast::ExprKind<U>;
+        type UnaryOp = rspy_ast::ExprKind<U>;
+        type Lambda = rspy_ast::ExprKind<U>;
+        type IfExp = rspy_ast::ExprKind<U>;
+        type Dict = rspy_ast::ExprKind<U>;
+        type Set = rspy_ast::ExprKind<U>;
+        type ListComp = rspy_ast::ExprKind<U>;
+        type SetComp = rspy_ast::ExprKind<U>;
+        type DictComp = rspy_ast::ExprKind<U>;
+        type GeneratorExp = rspy_ast::ExprKind<U>;
+        type Await = rspy_ast::ExprKind<U>;
+        type Yield = rspy_ast::ExprKind<U>;
+        type YieldFrom = rspy_ast::ExprKind<U>;
+        type Compare = rspy_ast::ExprKind<U>;
+        type Call = rspy_ast::ExprKind<U>;
+        type FormattedValue = rspy_ast::ExprKind<U>;
+        type JoinedStr = rspy_ast::ExprKind<U>;
+        type ConstantExpr = rspy_ast::ExprKind<U>;
+        type Attribute = rspy_ast::ExprKind<U>;
+        type Subscript = rspy_ast::ExprKind<U>;
+        type Starred = rspy_ast::ExprKind<U>;
+        type Name = rspy_ast::ExprKind<U>;
+        type List = rspy_ast::ExprKind<U>;
+        type Tuple = rspy_ast::ExprKind<U>;
+        type Slice = rspy_ast::ExprKind<U>;
+        type Expr = rspy_ast::Expr<U>;
+        type ExceptHandler = rspy_ast::Excepthandler<U>;
+        type MatchValue = rspy_ast::PatternKind<U>;
+        type MatchSingleton = rspy_ast::PatternKind<U>;
+        type MatchSequence = rspy_ast::PatternKind<U>;
+        type MatchMapping = rspy_ast::PatternKind<U>;
+        type MatchClass = rspy_ast::PatternKind<U>;
+        type MatchStar = rspy_ast::PatternKind<U>;
+        type MatchAs = rspy_ast::PatternKind<U>;
+        type MatchOr = rspy_ast::PatternKind<U>;
+        type Pattern = rspy_ast::Pattern<U>;
+        type Withitem = rspy_ast::Withitem<U>;
+        type MatchCase = rspy_ast::MatchCase<U>;
+        type FunctionDef = rspy_ast::StmtKind<U>;
+        type AsyncFunctionDef = rspy_ast::StmtKind<U>;
+        type ClassDef = rspy_ast::StmtKind<U>;
+        type Return = rspy_ast::StmtKind<U>;
+        type Delete = rspy_ast::StmtKind<U>;
+        type Assign = rspy_ast::StmtKind<U>;
+        type AugAssign = rspy_ast::StmtKind<U>;
+        type AnnAssign = rspy_ast::StmtKind<U>;
+        type For = rspy_ast::StmtKind<U>;
+        type AsyncFor = rspy_ast::StmtKind<U>;
+        type While = rspy_ast::StmtKind<U>;
+        type If = rspy_ast::StmtKind<U>;
+        type With = rspy_ast::StmtKind<U>;
+        type AsyncWith = rspy_ast::StmtKind<U>;
+        type Match = rspy_ast::StmtKind<U>;
+        type Raise = rspy_ast::StmtKind<U>;
+        type Try = rspy_ast::StmtKind<U>;
+        type Assert = rspy_ast::StmtKind<U>;
+        type Import = rspy_ast::StmtKind<U>;
+        type ImportFrom = rspy_ast::StmtKind<U>;
+        type Global = rspy_ast::StmtKind<U>;
+        type Nonlocal = rspy_ast::StmtKind<U>;
+        type Stmt = rspy_ast::Stmt<U>;
+
+        #[inline]
+        fn stmts(&self) -> &[Self::Stmt] {
+            self
         }
     }
 }
